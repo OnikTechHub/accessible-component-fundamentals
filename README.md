@@ -1,30 +1,31 @@
 # FE-03: Accessible Component Fundamentals
 
-An exploration and implementation of core web accessibility (a11y) patterns built strictly following the **W3C ARIA Authoring Practices Guide (APG)** in **React 19**, **TypeScript**, and **Tailwind CSS**, comparing custom scratch implementations against production-grade headless primitives from **shadcn/ui** (Base UI / Radix).
+An exploration, implementation, and rigorous audit of foundational web accessibility (a11y) patterns built strictly following the **W3C ARIA Authoring Practices Guide (APG)** in **React 19**, **TypeScript**, and **Tailwind CSS**. Custom scratch implementations are showcased side-by-side with production-grade headless primitives from **shadcn/ui** (Base UI / Radix).
 
 ---
 
 ## 🌟 Key Features
 
-### 1. Custom Scratch Components (Zero Third-Party Component Dependencies)
-- **Modal Dialog (`playground/Modal.tsx` / `src/playground/Modal.tsx`)**:
-  - Proper ARIA roles: `role="dialog"`, `role="alertdialog"`, `aria-modal="true"`, `aria-labelledby`, and `aria-describedby`.
-  - **Focus Management**: Saves previous active element on open, automatically moves focus into the modal, and restores focus back to the exact trigger button upon closing.
-  - **Focus Trap**: Intercepts `Tab` and `Shift+Tab` to keep keyboard cycling strictly bounded within interactive children inside the modal.
-  - **Keyboard & Viewport**: Dismisses cleanly on `Escape` key press or backdrop click. Prevents background page scrolling while open with layout shift compensation.
+### 1. Custom Scratch Components (Zero Third-Party UI Library Dependencies)
+- **Modal Dialog (`playground/Modal.tsx` & `src/playground/Modal.tsx`)**:
+  - Proper ARIA roles & semantics: `role="dialog"` / `role="alertdialog"`, `aria-modal="true"`, `aria-labelledby`, and `aria-describedby`.
+  - **Focus Management**: Automatically caches the triggering DOM element on open, moves focus into `initialFocusRef` or the first interactive element via `requestAnimationFrame`, and restores focus back to the exact trigger button upon closing.
+  - **Focus Trap**: Intercepts `Tab` and `Shift+Tab` to keep keyboard cycling strictly bounded within interactive children inside the modal dialog.
+  - **Background Tree Isolation**: Applies `aria-hidden="true"` to sibling DOM roots in `document.body` while the modal is active, preventing screen reader virtual cursor leakage.
+  - **Keyboard & Viewport**: Dismisses cleanly on `Escape` key press or backdrop click. Locks background page scrolling (`overflow = "hidden"`) with scrollbar width compensation to eliminate layout shift.
   - Teleportation via React `createPortal` to `document.body`.
-- **Tabs (`playground/Tabs.tsx` / `src/playground/Tabs.tsx`)**:
+- **Tabs (`playground/Tabs.tsx` & `src/playground/Tabs.tsx`)**:
   - Semantic ARIA roles: `role="tablist"`, `role="tab"`, `role="tabpanel"`.
   - Proper state binding: `aria-selected`, `aria-controls`, `aria-labelledby`.
   - **Roving `tabIndex`**: Active tab receives `tabIndex={0}`, while inactive sibling tabs receive `tabIndex={-1}`.
   - **Keyboard Navigation**: Full support for `ArrowRight`, `ArrowLeft`, `Home`, and `End` keys (plus `ArrowDown` and `ArrowUp` for vertical orientation) with looping.
   - Configurable `activationMode` (`automatic` vs `manual`).
-  - Accessible tabpanels (`tabIndex={0}`) allowing keyboard users to scroll and read panel content.
-- **Disclosure (`playground/Disclosure.tsx` / `src/playground/Disclosure.tsx`)**:
+  - Accessible tabpanels (`tabIndex={0}`) allowing keyboard users to scroll and read panel content without requiring nested interactive children.
+- **Disclosure (`playground/Disclosure.tsx` & `src/playground/Disclosure.tsx`)**:
   - Trigger `<button>` element with synchronized `aria-expanded` and `aria-controls`.
   - Collapsible content region with `role="region"` and `aria-labelledby`.
-  - **Keyboard Support**: Seamless toggle on `Enter` and `Space` with page scroll suppression.
-  - High-contrast visible focus indicators (`focus-visible:ring-2`).
+  - **Keyboard Support**: Seamless toggle on `Enter` and `Space` with window scroll suppression (`event.preventDefault()`).
+  - High-contrast visible focus indicators (`focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`).
 
 ### 2. Side-by-Side Comparison with `shadcn/ui`
 - Initialized `shadcn/ui` with generated `dialog` and `tabs` components in `src/components/ui/`.
@@ -58,6 +59,7 @@ An exploration and implementation of core web accessibility (a11y) patterns buil
 
 ```
 ├── NOTES.md                     # Comprehensive comparison & keyboard audit notes
+├── README.md                    # Project documentation & testing guide
 ├── playground/                  # Root export layer
 │   ├── Modal.tsx                # Custom scratch Modal Dialog
 │   ├── Tabs.tsx                 # Custom scratch Tabs
@@ -99,9 +101,10 @@ npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) to access the interactive accessibility showcase.
 
-### 3. Build & Verify Type Safety
+### 3. Verify TypeScript, Linting & Production Build
 ```bash
+npx tsc --noEmit
 npm run lint
 npm run build
 ```
-Verification passes with **0 TypeScript errors (0 `any` types)** and **0 ESLint warnings**.
+Verification passes with **0 TypeScript errors (0 `any` types)**, **0 ESLint warnings**, and **clean static page generation** ready for Vercel deployment.
